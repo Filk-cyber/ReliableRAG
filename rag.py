@@ -241,7 +241,6 @@ def retrieve_documents_by_similarity_score(question: str, ctxs: List[Dict], args
     end_index = len(ctxs) - 3
     ctxs = ctxs[:end_index + args.fake_num]
     for i, ctx in enumerate(ctxs):
-        # Only use text content as retrieval document
         documents.append(ctx["text"])
         if ideal_setting:
             if i < end_index:
