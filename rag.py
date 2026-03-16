@@ -194,7 +194,7 @@ def retrieve_documents_by_similarity(question: str, ctxs: List[Dict], args) -> L
     end_index = len(ctxs) - 3
     ctxs = ctxs[:end_index + args.fake_num]
     for ctx in ctxs:
-        documents.append("title: {}, text: {}".format(ctx["title"], ctx["text"]))
+        documents.append(ctx["text"])
 
     # Calculate document embeddings
     doc_embeddings = get_e5_mistral_embeddings_for_document(documents, max_length=256, batch_size=2)
@@ -242,7 +242,7 @@ def retrieve_documents_by_similarity_score(question: str, ctxs: List[Dict], args
     ctxs = ctxs[:end_index + args.fake_num]
     for i, ctx in enumerate(ctxs):
         # Only use text content as retrieval document
-        documents.append("title: {}, text: {}".format(ctx["title"], ctx["text"]))
+        documents.append(ctx["text"])
         if ideal_setting:
             if i < end_index:
                 truthful_scores.append(10)
