@@ -914,9 +914,9 @@ def main():
     Main function - Usage example
     """
     # Configuration parameters
-    API_KEY = "05748176082447f483438dfd914cc299.NcsCifhTarCch6es"  # Please fill in your ZhipuAI API Key
-    INPUT_FILE = "/home/jiangjp/trace-idea/data/2wikimultihopqa/wiki_test1000_add_orifake.json"
-    OUTPUT_FILE = "/home/jiangjp/trace-idea/data/2wikimultihopqa/wiki_test1000_add_ctxs.json"
+    API_KEY = ""  # Please fill in your ZhipuAI API Key
+    INPUT_FILE = "wiki_test1000_add_orifake.json"
+    OUTPUT_FILE = "wiki_test1000_add_ctxs.json"
 
     # Parallel processing parameters
     MAX_WORKERS = 3000  # Number of concurrent threads, adjust based on API limits
