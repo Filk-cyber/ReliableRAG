@@ -51,10 +51,6 @@ def setup_parser():
     parser.add_argument("--fake_num", type=int, default=1)
     parser.add_argument("--weight", type=float, default=1.0,
                         help="weight for similarity score in fusion score calculation (0.0-1.0)")
-    parser.add_argument("--Additive_Fusion", action="store_true",
-                        help="Run ablation study comparing Additive Fusion")
-    parser.add_argument("--Multiplicative_Fusion", action="store_true",
-                        help="Run ablation study comparing Multiplicative Fusion")
     args = parser.parse_args()
     return args
 
@@ -472,11 +468,6 @@ def construct_reasoning_chains(args, ideal_setting: bool = False):
             paths_scores = [new_paths_scores[idx] for idx in topk_new_paths_sorted_indices]
             paths_finished = [new_paths_finished[idx] for idx in topk_new_paths_sorted_indices]
 
-        # ==============================================================================
-        # [INSERTED CODE START] Entropy Filter (Full Sequence Probability)
-        # ==============================================================================
-
-        # --- Helper functions definition start ---
         def get_single_answer_log_probability(model, tokenizer, input_ids, attention_mask, answer_text):
             """Calculate the log probability of the model generating a single answer (Teacher Forcing)"""
             try:
@@ -614,10 +605,6 @@ def construct_reasoning_chains(args, ideal_setting: bool = False):
             paths = [x[0] for x in combined]
             paths_scores = [x[1] for x in combined]
             paths_finished = [x[2] for x in combined]
-
-        # ==============================================================================
-        # [INSERTED CODE END]
-        # ==============================================================================
 
         # Store the final reasoning chains in the example
         example["chains"] = [
