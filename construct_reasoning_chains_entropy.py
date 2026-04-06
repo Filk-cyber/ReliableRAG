@@ -49,8 +49,6 @@ def setup_parser():
     parser.add_argument("--calculate_ranked_prompt_indices", action="store_true",
                         help="whether to use retriever to adaptively choose demonstrations")
     parser.add_argument("--fake_num", type=int, default=1)
-    parser.add_argument("--weight", type=float, default=1.0,
-                        help="weight for similarity score in fusion score calculation (0.0-1.0)")
     args = parser.parse_args()
     return args
 
@@ -310,25 +308,15 @@ def construct_reasoning_chains(args, ideal_setting: bool = False):
 
     global tokenizer, token_id_to_choice_map
     for example in tqdm(data, desc="Generating reasoning chains", total=len(data)):
-
         question = example["question"]
         triples, triple_positions = [], []
-        truthful_scores = []
         end_index = len(example["ctxs"]) - 3
         ctxs = example["ctxs"][:end_index + args.fake_num]
-        for i, ctx in enumerate(ctxs):
+        for ctx in example["ctxs"]:
             for triple_item in ctx["triples"]:
                 triples.append("<{}; {}; {}>".format(triple_item["head"], triple_item["relation"], triple_item["tail"]))
                 triple_positions.append(triple_item["position"])
-                if ideal_setting:
-                    if i < end_index:
-                        truthful_scores.append(10)
-                    else:
-                        truthful_scores.append(1)
-                else:
-                    truthful_scores.append(triple_item["triple_truthful_score"])
-
-        truthful_scores_tensor = torch.tensor(truthful_scores, dtype=torch.bfloat16) / 10.0
+                
         # Compute embeddings for all knowledge triples to enable similarity-based retrieval
         num_total_triples = len(triples)
         if args.ranking_model == "e5_mistral":
@@ -369,15 +357,6 @@ def construct_reasoning_chains(args, ideal_setting: bool = False):
 
             # Calculate the scores between queries and all triples
             queries_triples_similarities = torch.matmul(queries_embeddings, triples_embeddings.T)  # n_path, n_triples
-            expanded_truthful_scores = truthful_scores_tensor.unsqueeze(0).expand(queries_triples_similarities.shape[0],
-                                                                                  -1)
-            if args.Additive_Fusion:
-                queries_triples_similarities = queries_triples_similarities + expanded_truthful_scores
-            elif args.Multiplicative_Fusion:
-                queries_triples_similarities = queries_triples_similarities * expanded_truthful_scores
-            else:
-                queries_triples_similarities = args.weight * queries_triples_similarities + (
-                            1 - args.weight) * expanded_truthful_scores
 
             # Mask out triples already used in each path
             candidate_triples_mask = torch.ones_like(queries_triples_similarities)
